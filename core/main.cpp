@@ -9,21 +9,26 @@
 #include "../utils/timespec_utils.h"
 
 
-int main() {
+int main(int argc, char*argv[]) {
     config_t cfg;
     config_init(&cfg);
     config_setting_t * settings_l1 = NULL;
 
     char filename[256];
-    sprintf(filename,"%s/.%s/%s.cfg", getenv("HOME"), "wrp", "wrp");
+
+    if (argc == 1){
+        sprintf(filename,"%s/.%s/%s.cfg", getenv("HOME"), "wrp", "wrp");
+    }else{
+        sprintf(filename,"%s/.%s/%s.cfg", getenv("HOME"), "wrp", argv[1]);
+    }
 
     /* config file is like:
-    
+
     layer_1: {
         interface = "wlan0";
         use_mon = true;
     }
-    
+
     */
 
     printf("Reading configuration file %s...", filename);
@@ -41,7 +46,7 @@ int main() {
 
     /* L1_setup(protocol, use_monitor, settings) */
     L1_setup(0x0, 1, settings_l1);
-    
+
     while (1) {
 
         /* L1_receive(timeout, data, packet_info) */

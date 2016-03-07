@@ -125,7 +125,7 @@ static void parse_radiotap(struct ieee80211_radiotap_header * buf, struct WRPPac
     int ret = ieee80211_radiotap_iterator_init(&iterator, buf, buf->it_len, 0);
     // WMP_MSG(stderr, "ret1: %d buf->it_len:%d \n", ret, buf->it_len);
     while (!ret) {
-        ret = ieee80211_radiotap_iterator_next(&iterator);       
+        ret = ieee80211_radiotap_iterator_next(&iterator);
 
         if (ret) {
             continue;
@@ -223,6 +223,7 @@ int L1_setup(int proto, int use_mon, config_setting_t * settings) {
     char interface[64] = {"lo"};
     char essid[64] = {"robotics"};
     char ip[64] = {0};
+    char monitor_interface[64] = {"mon0"};
 
     int wait_join = 1, configure_card = 1;
 
@@ -241,6 +242,9 @@ int L1_setup(int proto, int use_mon, config_setting_t * settings) {
         }
         if (config_setting_lookup_string(settings, "ip", &str2)){
             sprintf(ip, "%s", str2);
+        }
+        if (config_setting_lookup_string(settings, "monitor_interface", &str2)){
+            sprintf(monitor_interface, "%s", str2);
         }
         config_setting_lookup_int(settings, "freq", &l1_freq);
         config_setting_lookup_int(settings, "rate", &l1_rate);
@@ -267,7 +271,7 @@ int L1_setup(int proto, int use_mon, config_setting_t * settings) {
     }else{
         int ns;
         if (use_monitor) {
-            ns = create_monitor(interface, "mon0");
+            ns = create_monitor(interface, monitor_interface);
             if (ns !=0){
                 fprintf(stderr,"Unable to create monitor interface (error %d)\n", ns);
                 if (ns == -2){
@@ -275,7 +279,7 @@ int L1_setup(int proto, int use_mon, config_setting_t * settings) {
                 }
                 exit(1);
             }
-            res |= sock_raw_init("mon0", ETH_P_ALL, &L1_sock_rx, &rxi, rx_mac);
+            res |= sock_raw_init(monitor_interface, ETH_P_ALL, &L1_sock_rx, &rxi, rx_mac);
         }else{
             res |= sock_raw_init(interface, ETH_P_ALL, &L1_sock_rx, &rxi, rx_mac);
         }
@@ -298,7 +302,7 @@ int L1_setup(int proto, int use_mon, config_setting_t * settings) {
                     fprintf(stderr,"Unable to join network (error %d)\n", ns);
                     exit(1);
                 }
-            }                        
+            }
         }
 
 
